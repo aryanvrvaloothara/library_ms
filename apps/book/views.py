@@ -1,5 +1,5 @@
 from django.utils import timezone
-from rest_framework import viewsets
+from rest_framework import viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -12,6 +12,12 @@ class BookViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['title',
+                     'author__first_name',
+                     'author__first_name'
+                     ]
 
 
 class BookLogViewSet(viewsets.ModelViewSet):
@@ -28,7 +34,7 @@ class BookLogViewSet(viewsets.ModelViewSet):
             if book_log_obj.book.available_book_count is None:
                 book_obj.available_book_count = book_obj.total_book_count - 1
                 book_obj.save()
-            elif book_log_obj.book.available_book_count is 0:
+            elif book_log_obj.book.available_book_count == 0:
                 return Response({"message": 'Book not available.'
                 })
             else:
